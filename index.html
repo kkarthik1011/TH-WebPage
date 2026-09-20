@@ -45,14 +45,6 @@
       cursor: pointer;
       font-weight: bold;
     }
-    .reward-box {
-      background-color: #ecfdf5;
-      border: 1px dashed #10b981;
-      padding: 15px;
-      border-radius: 8px;
-      margin-top: 15px;
-      color: #065f46;
-    }
     .clue-box {
       background-color: #eff6ff;
       border-left: 4px solid #2563eb;
@@ -68,7 +60,7 @@
 
 <div class="card">
   <h2 id="tagTitle">Treasure Hunt Location</h2>
-  <p>Enter the answer for this location to reveal your gift card and the next clue!</p>
+  <p>Enter the correct answer for this location to reveal your next clue!</p>
   
   <form id="gameForm">
     <input type="text" id="answerInput" placeholder="Enter your answer..." required autocomplete="off"/>
@@ -78,10 +70,6 @@
   <p class="error" id="errorMsg"></p>
 
   <div id="resultContainer" style="display: none;">
-    <div class="reward-box">
-      <strong>🎁 Gift Card Claim Code:</strong>
-      <h3 id="giftCodeDisplay" style="margin: 5px 0;"></h3>
-    </div>
     <div class="clue-box">
       <strong>🔎 Next Clue:</strong>
       <p id="nextClueDisplay" style="margin: 5px 0;"></p>
@@ -90,10 +78,9 @@
 </div>
 
 <script>
-  // Paste your Google Apps Script Web App URL below:
-  const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxGWSvQFNgrGa6zyfOAHahUbICblweFUxr2sRIP973q6UJg77gbC_QtazVH_qFkd18/exec";
+  // Replace with your Google Apps Script Web App URL:
+  const SCRIPT_URL = "YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL";
 
-  // Parse the current tagId from the URL (e.g. site.com/?tagId=1)
   const urlParams = new URLSearchParams(window.location.search);
   const tagId = urlParams.get('tagId') || "1";
   
@@ -117,7 +104,6 @@
 
         if (data.success) {
           document.getElementById('gameForm').style.display = 'none';
-          document.getElementById('giftCodeDisplay').innerText = data.giftCard;
           document.getElementById('nextClueDisplay').innerText = data.nextClue;
           document.getElementById('resultContainer').style.display = 'block';
         } else {
