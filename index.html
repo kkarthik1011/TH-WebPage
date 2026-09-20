@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Treasure Hunt</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background-color: #f4f6f9;
+      margin: 0;
+      padding: 20px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+    .card {
+      background: #ffffff;
+      padding: 25px;
+      border-radius: 16px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+      width: 100%;
+      max-width: 400px;
+      text-align: center;
+    }
+    h2 { color: #333; margin-top: 0; }
+    input[type="text"] {
+      width: 100%;
+      padding: 12px;
+      margin: 15px 0;
+      border: 2px solid #ddd;
+      border-radius: 8px;
+      font-size: 16px;
+      box-sizing: border-box;
+    }
+    button {
+      background-color: #2563eb;
+      color: #fff;
+      border: none;
+      padding: 12px 20px;
+      font-size: 16px;
+      border-radius: 8px;
+      width: 100%;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    .reward-box {
+      background-color: #ecfdf5;
+      border: 1px dashed #10b981;
+      padding: 15px;
+      border-radius: 8px;
+      margin-top: 15px;
+      color: #065f46;
+    }
+    .clue-box {
+      background-color: #eff6ff;
+      border-left: 4px solid #2563eb;
+      padding: 15px;
+      margin-top: 15px;
+      text-align: left;
+      border-radius: 4px;
+    }
+    .error { color: #dc2626; margin-top: 10px; font-weight: bold; }
+  </style>
+</head>
+<body>
+
+<div class="card">
+  <h2 id="tagTitle">Treasure Hunt Location</h2>
+  <p>Enter the answer for this location to reveal your gift card and the next clue!</p>
+  
+  <form id="gameForm">
+    <input type="text" id="answerInput" placeholder="Enter your answer..." required autocomplete="off"/>
+    <button type="submit" id="submitBtn">Submit Answer</button>
+  </form>
+
+  <p class="error" id="errorMsg"></p>
+
+  <div id="resultContainer" style="display: none;">
+    <div class="reward-box">
+      <strong>🎁 Gift Card Claim Code:</strong>
+      <h3 id="giftCodeDisplay" style="margin: 5px 0;"></h3>
+    </div>
+    <div class="clue-box">
+      <strong>🔎 Next Clue:</strong>
+      <p id="nextClueDisplay" style="margin: 5px 0;"></p>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Paste your Google Apps Script Web App URL below:
+  const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxGWSvQFNgrGa6zyfOAHahUbICblweFUxr2sRIP973q6UJg77gbC_QtazVH_qFkd18/exec";
+
+  // Parse the current tagId from the URL (e.g. site.com/?tagId=1)
+  const urlParams = new URLSearchParams(window.location.search);
+  const tagId = urlParams.get('tagId') || "1";
+  
+  document.getElementById('tagTitle').innerText = `Location #${tagId}`;
+
+  document.getElementById('gameForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const answer = document.getElementById('answerInput').value;
+    const submitBtn = document.getElementById('submitBtn');
+    const errorMsg = document.getElementById('errorMsg');
+    
+    errorMsg.innerText = "";
+    submitBtn.innerText = "Checking...";
+    submitBtn.disabled = true;
+
+    fetch(`${SCRIPT_URL}?tagId=${encodeURIComponent(tagId)}&answer=${encodeURIComponent(answer)}`)
+      .then(response => response.json())
+      .then(data => {
+        submitBtn.innerText = "Submit Answer";
+        submitBtn.disabled = false;
+
+        if (data.success) {
+          document.getElementById('gameForm').style.display = 'none';
+          document.getElementById('giftCodeDisplay').innerText = data.giftCard;
+          document.getElementById('nextClueDisplay').innerText = data.nextClue;
+          document.getElementById('resultContainer').style.display = 'block';
+        } else {
+          errorMsg.innerText = data.message;
+        }
+      })
+      .catch(err => {
+        submitBtn.innerText = "Submit Answer";
+        submitBtn.disabled = false;
+        errorMsg.innerText = "Error connecting to server. Please try again.";
+      });
+  });
+</script>
+
+</body>
+</html>
