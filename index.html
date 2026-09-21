@@ -3,11 +3,13 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Treasure Hunt</title>
+  <title>Treasure Hunt - Happy Birthday Harshi!</title>
+  <!-- Confetti JS for Celebration -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
   <style>
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      background-color: #f4f6f9;
+      background: linear-gradient(135deg, #fce7f3 0%, #e0e7ff 100%);
       margin: 0;
       padding: 20px;
       display: flex;
@@ -17,50 +19,97 @@
     }
     .card {
       background: #ffffff;
-      padding: 25px;
-      border-radius: 16px;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+      padding: 30px 25px;
+      border-radius: 20px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.1);
       width: 100%;
-      max-width: 400px;
+      max-width: 420px;
       text-align: center;
+      transition: all 0.3s ease;
     }
-    h2 { color: #333; margin-top: 0; }
+    h2 { color: #1e293b; margin-top: 0; }
     input[type="text"] {
       width: 100%;
-      padding: 12px;
+      padding: 14px;
       margin: 15px 0;
-      border: 2px solid #ddd;
-      border-radius: 8px;
+      border: 2px solid #cbd5e1;
+      border-radius: 12px;
       font-size: 16px;
       box-sizing: border-box;
+      outline: none;
+    }
+    input[type="text"]:focus {
+      border-color: #6366f1;
     }
     button {
-      background-color: #2563eb;
+      background-color: #4f46e5;
       color: #fff;
       border: none;
-      padding: 12px 20px;
+      padding: 14px 20px;
       font-size: 16px;
-      border-radius: 8px;
+      border-radius: 12px;
       width: 100%;
       cursor: pointer;
       font-weight: bold;
+      transition: background 0.2s;
     }
+    button:hover { background-color: #4338ca; }
+    
+    /* Standard Clue Box */
     .clue-box {
       background-color: #eff6ff;
-      border-left: 4px solid #2563eb;
+      border-left: 4px solid #3b82f6;
       padding: 15px;
       margin-top: 15px;
       text-align: left;
-      border-radius: 4px;
+      border-radius: 8px;
     }
     .error { color: #dc2626; margin-top: 10px; font-weight: bold; }
+
+    /* Birthday Celebration Card Styling */
+    .birthday-card {
+      background: linear-gradient(135deg, #fff1f2 0%, #fef2f2 100%);
+      border: 2px solid #f43f5e;
+      border-radius: 16px;
+      padding: 25px 20px;
+      margin-top: 10px;
+      animation: popIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    .birthday-title {
+      font-size: 26px;
+      color: #e11d48;
+      margin: 10px 0;
+      font-weight: 800;
+    }
+    .birthday-message {
+      color: #475569;
+      font-size: 15px;
+      line-height: 1.6;
+      margin: 15px 0;
+      text-align: left;
+    }
+    .cake-icon {
+      font-size: 50px;
+      margin-bottom: 5px;
+      display: inline-block;
+      animation: pulse 1.5s infinite ease-in-out;
+    }
+
+    @keyframes popIn {
+      0% { transform: scale(0.8); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.15); }
+    }
   </style>
 </head>
 <body>
 
 <div class="card">
   <h2 id="tagTitle">Treasure Hunt Location</h2>
-  <p>Enter the correct answer for this location to reveal your next clue!</p>
+  <p id="subInstruction">Enter the correct answer for this location to reveal your next clue!</p>
   
   <form id="gameForm">
     <input type="text" id="answerInput" placeholder="Enter your answer..." required autocomplete="off"/>
@@ -69,17 +118,38 @@
 
   <p class="error" id="errorMsg"></p>
 
+  <!-- Standard Next Clue Display -->
   <div id="resultContainer" style="display: none;">
     <div class="clue-box">
       <strong>🔎 Next Clue:</strong>
       <p id="nextClueDisplay" style="margin: 5px 0;"></p>
     </div>
   </div>
+
+  <!-- Final Birthday Victory Card -->
+  <div id="birthdayContainer" style="display: none;">
+    <div class="birthday-card">
+      <div class="cake-icon">🎂🎉✨</div>
+      <div class="birthday-title">Happy Birthday Harshi! ❤️</div>
+      <p style="font-weight: bold; color: #059669; margin: 5px 0;">
+        🏆 You solved all clues & finished the Treasure Hunt!
+      </p>
+      
+      <div class="birthday-message">
+        <p>Dearest Harshi,</p>
+        <p>You made it to the very end! Just like solving every clue today, you bring so much joy, light, and fun into every step of our journey together.</p>
+        <p>May this year bring you endless laughter, incredible adventures, delicious food, and all the happiness in the world. I am so lucky to celebrate another wonderful year of you!</p>
+        <p style="text-align: right; font-weight: bold; color: #e11d48; margin-bottom: 0;">
+          With all my love, always. ❤️
+        </p>
+      </div>
+    </div>
+  </div>
 </div>
 
 <script>
-  // Replace with your Google Apps Script Web App URL:
-  const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxGWSvQFNgrGa6zyfOAHahUbICblweFUxr2sRIP973q6UJg77gbC_QtazVH_qFkd18/exec";
+  // Paste your deployed Google Apps Script Web App URL below:
+  const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx.../exec";
 
   const urlParams = new URLSearchParams(window.location.search);
   const tagId = urlParams.get('tagId') || "1";
@@ -96,7 +166,10 @@
     submitBtn.innerText = "Checking...";
     submitBtn.disabled = true;
 
-    fetch(`${SCRIPT_URL}?tagId=${encodeURIComponent(tagId)}&answer=${encodeURIComponent(answer)}`)
+    fetch(`${SCRIPT_URL}?tagId=${encodeURIComponent(tagId)}&answer=${encodeURIComponent(answer)}`, {
+      method: "GET",
+      redirect: "follow"
+    })
       .then(response => response.json())
       .then(data => {
         submitBtn.innerText = "Submit Answer";
@@ -104,8 +177,18 @@
 
         if (data.success) {
           document.getElementById('gameForm').style.display = 'none';
-          document.getElementById('nextClueDisplay').innerText = data.nextClue;
-          document.getElementById('resultContainer').style.display = 'block';
+          document.getElementById('subInstruction').style.display = 'none';
+
+          if (data.isFinal) {
+            // Trigger Birthday Card & Confetti
+            document.getElementById('tagTitle').innerText = "Congratulations! 🥳";
+            document.getElementById('birthdayContainer').style.display = 'block';
+            triggerConfetti();
+          } else {
+            // Standard Next Clue Flow
+            document.getElementById('nextClueDisplay').innerText = data.nextClue;
+            document.getElementById('resultContainer').style.display = 'block';
+          }
         } else {
           errorMsg.innerText = data.message;
         }
@@ -116,6 +199,23 @@
         errorMsg.innerText = "Error connecting to server. Please try again.";
       });
   });
+
+  function triggerConfetti() {
+    var count = 200;
+    var defaults = { origin: { y: 0.7 } };
+
+    function fire(particleRatio, opts) {
+      confetti(Object.assign({}, defaults, opts, {
+        particleCount: Math.floor(count * particleRatio)
+      }));
+    }
+
+    fire(0.25, { spread: 26, startVelocity: 55 });
+    fire(0.2, { spread: 60 });
+    fire(0.35, { spread: 100, decay: 0.91, scalar: 0.8 });
+    fire(0.1, { spread: 120, startVelocity: 25, decay: 0.92, scalar: 1.2 });
+    fire(0.1, { spread: 120, startVelocity: 45 });
+  }
 </script>
 
 </body>
