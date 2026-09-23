@@ -7,27 +7,86 @@
   <!-- Confetti JS for Celebration -->
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
   <style>
+    /* Animated Gradient Background */
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      background: linear-gradient(135deg, #fce7f3 0%, #e0e7ff 100%);
+      background: linear-gradient(-45deg, #fce7f3, #e0e7ff, #fef3c7, #f3e8ff);
+      background-size: 400% 400%;
+      animation: gradientBG 12s ease infinite;
       margin: 0;
       padding: 20px;
       display: flex;
       justify-content: center;
       align-items: center;
       min-height: 100vh;
+      box-sizing: border-box;
     }
+
+    @keyframes gradientBG {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
     .card {
       background: #ffffff;
-      padding: 30px 25px;
-      border-radius: 20px;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+      padding: 28px 22px;
+      border-radius: 24px;
+      box-shadow: 0 12px 30px rgba(0,0,0,0.08);
       width: 100%;
       max-width: 420px;
       text-align: center;
       transition: all 0.3s ease;
+      box-sizing: border-box;
     }
-    h2 { color: #1e293b; margin-top: 0; }
+
+    /* Progress Tracker & Star Badges */
+    .progress-container {
+      margin-bottom: 20px;
+    }
+    .progress-text {
+      font-size: 13px;
+      font-weight: 700;
+      color: #64748b;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 8px;
+    }
+    .progress-bar-bg {
+      background-color: #e2e8f0;
+      border-radius: 10px;
+      height: 8px;
+      width: 100%;
+      overflow: hidden;
+      margin-bottom: 12px;
+    }
+    .progress-bar-fill {
+      background: linear-gradient(90deg, #6366f1, #ec4899);
+      height: 100%;
+      width: 10%;
+      border-radius: 10px;
+      transition: width 0.5s ease-in-out;
+    }
+    .star-badges {
+      display: flex;
+      justify-content: space-between;
+      padding: 0 4px;
+    }
+    .star-badge {
+      font-size: 14px;
+      opacity: 0.25;
+      filter: grayscale(100%);
+      transition: all 0.3s ease;
+    }
+    .star-badge.active {
+      opacity: 1;
+      filter: grayscale(0%);
+      transform: scale(1.2);
+    }
+
+    h2 { color: #1e293b; margin-top: 0; font-size: 22px; }
+    p { color: #475569; font-size: 15px; }
+
     input[type="text"] {
       width: 100%;
       padding: 14px;
@@ -37,12 +96,14 @@
       font-size: 16px;
       box-sizing: border-box;
       outline: none;
+      transition: border-color 0.2s;
     }
     input[type="text"]:focus {
       border-color: #6366f1;
     }
+
     button {
-      background-color: #4f46e5;
+      background: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%);
       color: #fff;
       border: none;
       padding: 14px 20px;
@@ -51,20 +112,21 @@
       width: 100%;
       cursor: pointer;
       font-weight: bold;
-      transition: background 0.2s;
+      box-shadow: 0 4px 12px rgba(79, 70, 229, 0.25);
+      transition: transform 0.1s, box-shadow 0.2s;
     }
-    button:hover { background-color: #4338ca; }
+    button:active { transform: scale(0.98); }
     
     /* Standard Clue Box */
     .clue-box {
       background-color: #eff6ff;
       border-left: 4px solid #3b82f6;
-      padding: 15px;
+      padding: 16px;
       margin-top: 15px;
       text-align: left;
       border-radius: 8px;
     }
-    .error { color: #dc2626; margin-top: 10px; font-weight: bold; }
+    .error { color: #dc2626; margin-top: 10px; font-weight: bold; font-size: 14px; }
 
     /* Hangman Hint Box Styling */
     .hint-box {
@@ -132,6 +194,26 @@
 <body>
 
 <div class="card">
+  <!-- Dynamic Progress Bar & Star Badges -->
+  <div class="progress-container">
+    <div class="progress-text" id="progressText">Location 1 of 10</div>
+    <div class="progress-bar-bg">
+      <div class="progress-bar-fill" id="progressBarFill"></div>
+    </div>
+    <div class="star-badges" id="starBadges">
+      <span class="star-badge" id="star1">⭐</span>
+      <span class="star-badge" id="star2">⭐</span>
+      <span class="star-badge" id="star3">⭐</span>
+      <span class="star-badge" id="star4">⭐</span>
+      <span class="star-badge" id="star5">⭐</span>
+      <span class="star-badge" id="star6">⭐</span>
+      <span class="star-badge" id="star7">⭐</span>
+      <span class="star-badge" id="star8">⭐</span>
+      <span class="star-badge" id="star9">⭐</span>
+      <span class="star-badge" id="star10">🌟</span>
+    </div>
+  </div>
+
   <h2 id="tagTitle">Treasure Hunt Location</h2>
   <p id="subInstruction">Enter the correct answer for this location to reveal your next clue!</p>
   
@@ -180,14 +262,100 @@
 <script>
   // Paste your deployed Google Apps Script Web App URL below:
   const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxGWSvQFNgrGa6zyfOAHahUbICblweFUxr2sRIP973q6UJg77gbC_QtazVH_qFkd18/exec";
-
   const urlParams = new URLSearchParams(window.location.search);
-  const tagId = urlParams.get('tagId') || "1";
+  const tagIdNum = parseInt(urlParams.get('tagId')) || 1;
+  const tagId = String(tagIdNum);
   
   let failedAttempts = 0;
 
+  // Initialize UI Progress Bar & Badges
   document.getElementById('tagTitle').innerText = `Location #${tagId}`;
+  document.getElementById('progressText').innerText = `Location ${tagIdNum} of 10`;
+  document.getElementById('progressBarFill').style.width = `${(tagIdNum / 10) * 100}%`;
 
+  for (let i = 1; i <= tagIdNum; i++) {
+    const star = document.getElementById(`star${i}`);
+    if (star) star.classList.add('active');
+  }
+
+  // --- Web Audio Synthesizer (SFX Effects) ---
+  const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+  function playChimeSound() {
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+    const now = audioCtx.currentTime;
+    
+    const osc1 = audioCtx.createOscillator();
+    const osc2 = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+
+    osc1.type = 'sine';
+    osc2.type = 'triangle';
+
+    osc1.frequency.setValueAtTime(523.25, now); // C5
+    osc1.frequency.exponentialRampToValueAtTime(659.25, now + 0.15); // E5
+    osc1.frequency.exponentialRampToValueAtTime(783.99, now + 0.3); // G5
+
+    osc2.frequency.setValueAtTime(1046.50, now + 0.3); // C6
+
+    gain.gain.setValueAtTime(0.15, now);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.6);
+
+    osc1.connect(gain);
+    osc2.connect(gain);
+    gain.connect(audioCtx.destination);
+
+    osc1.start(now);
+    osc2.start(now + 0.15);
+    osc1.stop(now + 0.6);
+    osc2.stop(now + 0.6);
+  }
+
+  function playErrorSound() {
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+    const now = audioCtx.currentTime;
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+
+    osc.type = 'sawtooth';
+    osc.frequency.setValueAtTime(160, now);
+    osc.frequency.setValueAtTime(120, now + 0.15);
+
+    gain.gain.setValueAtTime(0.15, now);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+
+    osc.start(now);
+    osc.stop(now + 0.35);
+  }
+
+  function playFanfareSound() {
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+    const notes = [523.25, 659.25, 783.99, 1046.50]; // C5, E5, G5, C6
+    const times = [0, 0.15, 0.30, 0.45];
+
+    notes.forEach((freq, idx) => {
+      const now = audioCtx.currentTime + times[idx];
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(freq, now);
+
+      gain.gain.setValueAtTime(0.2, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + (idx === 3 ? 1.2 : 0.25));
+
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+
+      osc.start(now);
+      osc.stop(now + (idx === 3 ? 1.2 : 0.25));
+    });
+  }
+
+  // --- Form Submit Handler ---
   document.getElementById('gameForm').addEventListener('submit', function(e) {
     e.preventDefault();
     const answerInput = document.getElementById('answerInput');
@@ -214,20 +382,23 @@
           document.getElementById('hintContainer').style.display = 'none';
 
           if (data.isFinal) {
-            // Trigger Birthday Card & Confetti
+            // Final Birthday Card & Fanfare
+            playFanfareSound();
             document.getElementById('tagTitle').innerText = "Congratulations! 🥳";
             document.getElementById('birthdayContainer').style.display = 'block';
             triggerConfetti();
           } else {
-            // Standard Next Clue Flow
+            // Standard Clue Flow
+            playChimeSound();
             document.getElementById('nextClueDisplay').innerText = data.nextClue;
             document.getElementById('resultContainer').style.display = 'block';
           }
         } else {
+          playErrorSound();
           failedAttempts++;
           errorMsg.innerText = data.message;
 
-          // Check if user has reached 3 or more failed attempts
+          // Display Hangman Hint after 3 failures
           if (failedAttempts >= 3 && data.correctAnswer) {
             showHangmanHint(data.correctAnswer, failedAttempts);
           }
@@ -248,11 +419,9 @@
       const len = cleanLetters.length;
       if (len === 0) return word;
 
-      // Reveal 1 letter at fail 3, 2 letters at fail 4, capped at max(1, len - 2)
       const maxReveal = len > 2 ? len - 2 : 1;
       const revealCount = Math.min(fails - 2, maxReveal);
 
-      // Preferred positions to reveal progressively (first letter, mid, last, etc.)
       const positions = [0, Math.floor(len / 2), len - 1, 1, len - 2];
       const revealedIndices = new Set(positions.slice(0, revealCount));
 
