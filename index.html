@@ -66,6 +66,26 @@
     }
     .error { color: #dc2626; margin-top: 10px; font-weight: bold; }
 
+    /* Hangman Hint Box Styling */
+    .hint-box {
+      background-color: #fef3c7;
+      border: 2px dashed #f59e0b;
+      border-radius: 12px;
+      padding: 15px;
+      margin-top: 15px;
+      color: #92400e;
+      animation: fadeIn 0.4s ease-in-out;
+    }
+    .hangman-display {
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 22px;
+      font-weight: bold;
+      letter-spacing: 3px;
+      color: #b45309;
+      margin-top: 8px;
+      word-break: break-word;
+    }
+
     /* Birthday Celebration Card Styling */
     .birthday-card {
       background: linear-gradient(135deg, #fff1f2 0%, #fef2f2 100%);
@@ -95,6 +115,10 @@
       animation: pulse 1.5s infinite ease-in-out;
     }
 
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-5px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
     @keyframes popIn {
       0% { transform: scale(0.8); opacity: 0; }
       100% { transform: scale(1); opacity: 1; }
@@ -117,6 +141,12 @@
   </form>
 
   <p class="error" id="errorMsg"></p>
+
+  <!-- Hangman Hint Container -->
+  <div id="hintContainer" class="hint-box" style="display: none;">
+    <strong>💡 Need a Hint?</strong>
+    <div id="hangmanDisplay" class="hangman-display"></div>
+  </div>
 
   <!-- Standard Next Clue Display -->
   <div id="resultContainer" style="display: none;">
@@ -154,11 +184,14 @@
   const urlParams = new URLSearchParams(window.location.search);
   const tagId = urlParams.get('tagId') || "1";
   
+  let failedAttempts = 0;
+
   document.getElementById('tagTitle').innerText = `Location #${tagId}`;
 
   document.getElementById('gameForm').addEventListener('submit', function(e) {
     e.preventDefault();
-    const answer = document.getElementById('answerInput').value;
+    const answerInput = document.getElementById('answerInput');
+    const answer = answerInput.value;
     const submitBtn = document.getElementById('submitBtn');
     const errorMsg = document.getElementById('errorMsg');
     
@@ -178,6 +211,7 @@
         if (data.success) {
           document.getElementById('gameForm').style.display = 'none';
           document.getElementById('subInstruction').style.display = 'none';
+          document.getElementById('hintContainer').style.display = 'none';
 
           if (data.isFinal) {
             // Trigger Birthday Card & Confetti
@@ -190,7 +224,13 @@
             document.getElementById('resultContainer').style.display = 'block';
           }
         } else {
+          failedAttempts++;
           errorMsg.innerText = data.message;
+
+          // Check if user has reached 3 or more failed attempts
+          if (failedAttempts >= 3 && data.correctAnswer) {
+            showHangmanHint(data.correctAnswer, failedAttempts);
+          }
         }
       })
       .catch(err => {
@@ -199,6 +239,45 @@
         errorMsg.innerText = "Error connecting to server. Please try again.";
       });
   });
+
+  // Generates hangman style word blanks with progressive letter reveals
+  function showHangmanHint(correctAnswer, fails) {
+    const words = correctAnswer.trim().split(/\s+/);
+    const hintWords = words.map(word => {
+      const cleanLetters = word.replace(/[^a-zA-Z0-9]/g, '');
+      const len = cleanLetters.length;
+      if (len === 0) return word;
+
+      // Reveal 1 letter at fail 3, 2 letters at fail 4, capped at max(1, len - 2)
+      const maxReveal = len > 2 ? len - 2 : 1;
+      const revealCount = Math.min(fails - 2, maxReveal);
+
+      // Preferred positions to reveal progressively (first letter, mid, last, etc.)
+      const positions = [0, Math.floor(len / 2), len - 1, 1, len - 2];
+      const revealedIndices = new Set(positions.slice(0, revealCount));
+
+      let letterIdx = 0;
+      let wordResult = "";
+
+      for (let i = 0; i < word.length; i++) {
+        const char = word[i];
+        if (/[a-zA-Z0-9]/.test(char)) {
+          if (revealedIndices.has(letterIdx)) {
+            wordResult += char.toUpperCase() + " ";
+          } else {
+            wordResult += "_ ";
+          }
+          letterIdx++;
+        } else {
+          wordResult += char + " ";
+        }
+      }
+      return wordResult.trim();
+    });
+
+    document.getElementById('hangmanDisplay').innerHTML = hintWords.join("&nbsp;&nbsp;&nbsp;");
+    document.getElementById('hintContainer').style.display = 'block';
+  }
 
   function triggerConfetti() {
     var count = 200;
